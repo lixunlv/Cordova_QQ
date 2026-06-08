@@ -20,13 +20,20 @@ NSString *appId = @"";
 @implementation CDVQQSDK {
     TencentOAuth *tencentOAuth;
 }
+
+- (void)setupTencentOAuth {
+    [TencentOAuth setIsUserAgreedAuthorization:YES];
+    tencentOAuth = [TencentOAuth sharedInstance];
+    [tencentOAuth setupAppId:appId enableUniveralLink:NO universalLink:nil delegate:self];
+}
+
 /**
  *  插件初始化，主要用户appkey注册
  */
 - (void)pluginInitialize {
     appId = [[self.commandDelegate settings] objectForKey:@"qq_app_id"];
-    if (nil == tencentOAuth) {
-        tencentOAuth = [[TencentOAuth alloc] initWithAppId:appId andDelegate:self];
+    if (nil == tencentOAuth || ![tencentOAuth.appId isEqualToString:appId]) {
+        [self setupTencentOAuth];
     }
 }
 /**
@@ -68,7 +75,7 @@ NSString *appId = @"";
  *  @param command CDVInvokedUrlCommand
  */
 - (void)checkQQInstalled:(CDVInvokedUrlCommand *)command {
-    if ([TencentOAuth iphoneQQInstalled] && [TencentOAuth iphoneQQSupportSSOLogin]) {
+    if ([TencentOAuth iphoneQQInstalled]) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     } else {
@@ -83,7 +90,7 @@ NSString *appId = @"";
  *  @param command CDVInvokedUrlCommand
  */
 - (void)checkTIMInstalled:(CDVInvokedUrlCommand *)command {
-    if ([TencentOAuth iphoneTIMInstalled] && [TencentOAuth iphoneTIMSupportSSOLogin]) {
+    if ([TencentOAuth iphoneTIMInstalled]) {
         CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     } else {
@@ -108,7 +115,7 @@ NSString *appId = @"";
  */
 - (void)ssoLogin:(CDVInvokedUrlCommand *)command {
     if (nil == tencentOAuth) {
-        tencentOAuth = [[TencentOAuth alloc] initWithAppId:appId andDelegate:self];
+        [self setupTencentOAuth];
     }
     NSDictionary *args = [command.arguments objectAtIndex:0];
     self.callback = command.callbackId;
@@ -116,8 +123,6 @@ NSString *appId = @"";
                                         kOPEN_PERMISSION_GET_USER_INFO,
                                         kOPEN_PERMISSION_GET_SIMPLE_USER_INFO,
                                         kOPEN_PERMISSION_ADD_ALBUM,
-                                        kOPEN_PERMISSION_ADD_ONE_BLOG,
-                                        kOPEN_PERMISSION_ADD_SHARE,
                                         kOPEN_PERMISSION_ADD_TOPIC,
                                         kOPEN_PERMISSION_CHECK_PAGE_FANS,
                                         kOPEN_PERMISSION_GET_INFO,
@@ -302,9 +307,9 @@ NSString *appId = @"";
  */
 - (void)shareTextToQQZone:(NSString *)text Client:(int) client {
     QQApiImageArrayForQZoneObject *txtObj = [QQApiImageArrayForQZoneObject objectWithimageDataArray:nil title:text extMap:nil];    if (client == 1) {
-        txtObj.shareDestType = AuthShareType_TIM;
+        txtObj.shareDestType = ShareDestTypeTIM;
     } else {
-        txtObj.shareDestType = AuthShareType_QQ;
+        txtObj.shareDestType = ShareDestTypeQQ;
     }
     SendMessageToQQReq *req = [SendMessageToQQReq reqWithContent:txtObj];
     QQApiSendResultCode sent = [QQApiInterface SendReqToQZone:req];
@@ -336,9 +341,9 @@ NSString *appId = @"";
                     break;
             }
             if (client == 1) {
-                txtObj.shareDestType = AuthShareType_TIM;
+                txtObj.shareDestType = ShareDestTypeTIM;
             } else {
-                txtObj.shareDestType = AuthShareType_QQ;
+                txtObj.shareDestType = ShareDestTypeQQ;
             }
             SendMessageToQQReq *req = [SendMessageToQQReq reqWithContent:txtObj];
             QQApiSendResultCode sent = [QQApiInterface sendReq:req];
@@ -364,9 +369,9 @@ NSString *appId = @"";
                     break;
             }
             if (client == 1) {
-                imgObj.shareDestType = AuthShareType_TIM;
+                imgObj.shareDestType = ShareDestTypeTIM;
             } else {
-                imgObj.shareDestType = AuthShareType_QQ;
+                imgObj.shareDestType = ShareDestTypeQQ;
             }
             SendMessageToQQReq *req = [SendMessageToQQReq reqWithContent:imgObj];
             QQApiSendResultCode sent = [QQApiInterface sendReq:req];
@@ -393,9 +398,9 @@ NSString *appId = @"";
                     break;
             }
             if (client == 1) {
-                newsObj.shareDestType = AuthShareType_TIM;
+                newsObj.shareDestType = ShareDestTypeTIM;
             } else {
-                newsObj.shareDestType = AuthShareType_QQ;
+                newsObj.shareDestType = ShareDestTypeQQ;
             }
             SendMessageToQQReq *req = [SendMessageToQQReq reqWithContent:newsObj];
             QQApiSendResultCode sent = [QQApiInterface sendReq:req];
@@ -424,9 +429,9 @@ NSString *appId = @"";
                     break;
             }
             if (client == 1) {
-                audioObj.shareDestType = AuthShareType_TIM;
+                audioObj.shareDestType = ShareDestTypeTIM;
             } else {
-                audioObj.shareDestType = AuthShareType_QQ;
+                audioObj.shareDestType = ShareDestTypeQQ;
             }
             SendMessageToQQReq *req = [SendMessageToQQReq reqWithContent:audioObj];
             QQApiSendResultCode sent = [QQApiInterface sendReq:req];
@@ -455,9 +460,9 @@ NSString *appId = @"";
                     break;
             }
             if (client == 1) {
-                videoObj.shareDestType = AuthShareType_TIM;
+                videoObj.shareDestType = ShareDestTypeTIM;
             } else {
-                videoObj.shareDestType = AuthShareType_QQ;
+                videoObj.shareDestType = ShareDestTypeQQ;
             }
             SendMessageToQQReq *req = [SendMessageToQQReq reqWithContent:videoObj];
             QQApiSendResultCode sent = [QQApiInterface sendReq:req];

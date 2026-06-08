@@ -55,6 +55,8 @@
         <array>
             <string>mqqapi</string>
             <string>mqq</string>
+            <string>mqqopensdknopasteboard</string>
+            <string>mqqopensdknopasteboardios16</string>
             <string>mqqOpensdkSSoLogin</string>
             <string>mqqconnect</string>
             <string>mqqopensdkdataline</string>
@@ -107,7 +109,7 @@
     <framework src="libsqlite3.tbd" />
     <framework src="libstdc++.tbd" />
     <framework src="libz.tbd" />
-    <!--QQ SDK version 3.2.3-->
+    <!--QQ SDK version 3.6.20-->
     <framework src="src/ios/TencentOpenAPI.framework" custom="true" framework="true"/>
     <resource-file src="src/ios/TencentOpenApi_IOS_Bundle.bundle" />
 
