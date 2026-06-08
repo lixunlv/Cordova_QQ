@@ -16,6 +16,7 @@ NSString *QQ_LOGIN_CANCEL = @"QQ login cancelled";
 NSString *QQ_LOGIN_NETWORK_ERROR = @"QQ login network error";
 NSString *QQ_SHARE_CANCEL = @"QQ share cancelled by user";
 NSString *appId = @"";
+NSString *qqUniversalLink = @"";
 
 @implementation CDVQQSDK {
     TencentOAuth *tencentOAuth;
@@ -24,7 +25,31 @@ NSString *appId = @"";
 - (void)setupTencentOAuth {
     [TencentOAuth setIsUserAgreedAuthorization:YES];
     tencentOAuth = [TencentOAuth sharedInstance];
-    [tencentOAuth setupAppId:appId enableUniveralLink:NO universalLink:nil delegate:self];
+    BOOL enableUniversalLink = qqUniversalLink && qqUniversalLink.length > 0;
+    [tencentOAuth setupAppId:appId enableUniveralLink:enableUniversalLink universalLink:qqUniversalLink delegate:self];
+}
+
+- (NSString *)normalizedUniversalLink:(NSString *)universalLink {
+    if (!universalLink || universalLink.length == 0) {
+        return @"";
+    }
+
+    NSString *link = [universalLink stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    if (link.length == 0) {
+        return @"";
+    }
+
+    if (![link hasPrefix:@"http://"] && ![link hasPrefix:@"https://"]) {
+        link = [NSString stringWithFormat:@"https://%@", link];
+    }
+
+    NSString *qqPath = [NSString stringWithFormat:@"/qq_conn/%@", appId];
+    NSURL *url = [NSURL URLWithString:link];
+    if (url && url.host.length > 0 && ![url.path hasPrefix:qqPath]) {
+        link = [NSString stringWithFormat:@"https://%@%@/", url.host, qqPath];
+    }
+
+    return link;
 }
 
 /**
@@ -32,6 +57,7 @@ NSString *appId = @"";
  */
 - (void)pluginInitialize {
     appId = [[self.commandDelegate settings] objectForKey:@"qq_app_id"];
+    qqUniversalLink = [self normalizedUniversalLink:[[self.commandDelegate settings] objectForKey:@"qq_universal_link"]];
     if (nil == tencentOAuth || ![tencentOAuth.appId isEqualToString:appId]) {
         [self setupTencentOAuth];
     }
@@ -49,6 +75,21 @@ NSString *appId = @"";
     } else {
         [TencentOAuth HandleOpenURL:url];
     }
+}
+
+- (BOOL)handleUserActivity:(NSUserActivity *)userActivity {
+    if (![userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb]) {
+        return NO;
+    }
+
+    NSURL *url = userActivity.webpageURL;
+    if (!url || ![TencentOAuth CanHandleUniversalLink:url]) {
+        return NO;
+    }
+
+    BOOL apiHandled = [QQApiInterface handleOpenUniversallink:url delegate:self];
+    BOOL oauthHandled = [TencentOAuth HandleUniversalLink:url];
+    return apiHandled || oauthHandled;
 }
 
 /**

@@ -13,6 +13,7 @@
   <issue>https://github.com/iVanPan/Cordova_QQ/issues</issue>
 
   <preference name="QQ_APP_ID" />
+  <preference name="QQ_UNIVERSAL_LINK" default="" />
 
   <!--require cordova version -->
   <engines>
@@ -32,6 +33,7 @@
          <param name="ios-package" value="CDVQQSDK"/>
        </feature>
        <preference name="QQ_APP_ID" value="$QQ_APP_ID" />
+       <preference name="QQ_UNIVERSAL_LINK" value="$QQ_UNIVERSAL_LINK" />
      </config-file>
 
     <!--set ios URLTypes for QQ SDK -->
@@ -101,6 +103,8 @@
     </config-file>
     <header-file src="src/ios/CDVQQSDK.h"/>
     <source-file src="src/ios/CDVQQSDK.m"/>
+    <header-file src="src/ios/AppDelegate+QQSDK.h"/>
+    <source-file src="src/ios/AppDelegate+QQSDK.m"/>
     <!--required frameworks for qq sdk-->
     <framework src="CoreGraphics.framework" />
     <framework src="CoreTelephony.framework" />

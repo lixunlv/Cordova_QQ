@@ -41,6 +41,8 @@ typedef NS_ENUM(NSInteger, QQShareType) {
 
 - (void)shareNews:(CDVInvokedUrlCommand *)command;
 
+- (BOOL)handleUserActivity:(NSUserActivity *)userActivity;
+
 //- (void)shareAudio:(NSString *)previewUrl flashUrl:(NSString *)flashUrl
 //             image:(NSString *)image
 //         withTitle:(NSString *)title
