@@ -45,6 +45,7 @@
           <key>CFBundleURLSchemes</key>
           <array>
             <string>tencent$QQ_APP_ID</string>
+            <string>QQ41E488CB</string>
           </array>
         </dict>
       </array>
